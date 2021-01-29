@@ -1,4 +1,5 @@
 -- from [LÖVE tutorial, part 2](http://www.headchant.com/2010/12/31/love2d-%E2%80%93-tutorial-part-2-pew-pew/)
+wf = require 'windfield'
 
 function love.load(arg)
   if arg and arg[#arg] == "-debug" then require("mobdebug").start() end
@@ -19,6 +20,10 @@ function love.load(arg)
     enemy.y = enemy.height + 100
     table.insert(enemies, enemy)
   end
+  world = wf.newWorld(0, 0, true)
+  world:setGravity(0, 512)
+  ground = world:newRectangleCollider(0, 465, 800, 150)
+  ground:setType('static') -- Types can be 'static', 'dynamic' or 'kinematic'. Defaults to 'dynamic'
 end
 
 function love.keyreleased(key)
@@ -27,7 +32,6 @@ function love.keyreleased(key)
     shoot()
   end
 end
-
 function love.update(dt)
   -- keyboard actions for our hero
   if love.keyboard.isDown("left") then
@@ -38,11 +42,15 @@ function love.update(dt)
 
   local remEnemy = {}
   local remShot = {}
+  
+  world:update(dt)
 
   -- update the shots
   for i,v in ipairs(hero.shots) do
     -- move them up up up
     v.y = v.y - dt * 100
+    
+    
 
     -- mark shots that are not visible for removal
     if v.y < 0 then
@@ -82,6 +90,8 @@ function love.update(dt)
 end
 
 function love.draw()
+  world:draw()
+    
   -- let's draw a background
   love.graphics.setColor(255,255,255,255)
 
@@ -106,12 +116,17 @@ function love.draw()
   end
 end
 
+
 function shoot()
   if #hero.shots >= 5 then return end
   local shot = {}
   shot.x = hero.x+hero.width/2
   shot.y = hero.y
   table.insert(hero.shots, shot)
+  --circle = world:newCircleCollider(shot.x, shot.y, 30)
+  box = world:newRectangleCollider(shot.x, shot.y, 15, 25)
+  box:setRestitution(0.5)
+  box:applyLinearImpulse(0, -410)
 end
 
 -- Collision detection function.

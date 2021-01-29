@@ -29,5 +29,7 @@ end
 function love.keypressed(key)
     if key == 'p' then
         box:applyLinearImpulse(0, -1000)
+        box:applyLinearImpulse(0, -1000)
+        box:applyLinearImpulse(0, -1000)
       end 
   end
