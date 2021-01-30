@@ -2,23 +2,6 @@
 wf = require 'windfield'
 
 function love.load(arg)
-  
-  --physics init
-  world = wf.newWorld(0, 0, true)
-  mind = wf.newWorld(0, 0, true)
-  world:setGravity(0, 512)
-  ground = world:newRectangleCollider(0, 465, 800, 150)
-  ground:setType('static') -- Types can be 'static', 'dynamic' or 'kinematic'. Defaults to 'dynamic'
-  
-  world:addCollisionClass('Bullet')
-  --enemy bullets but I did always love my classic lit
-  world:addCollisionClass('HeatRay')
-  
-  --this is nuts but it works: Enemy is actually just a box, EnemySkull is the actual enemy, on an oval-shaped skeleton so when you kill one the entity breaks and the skull falls out: so when I shoot this it's reduced from a nice kosher 2d obj into a messy physics object. Kinda like a ragdoll sys?
-  world:addCollisionClass('Enemy')
-  world:addCollisionClass('EnemySkull')
-  
-  --2d anarchisms.
   if arg and arg[#arg] == "-debug" then require("mobdebug").start() end
   hero = {} -- new table for the hero
   hero.x = 300 -- x,y coordinates of the hero
@@ -28,7 +11,6 @@ function love.load(arg)
   hero.speed = 150
   hero.shots = {} -- holds our fired shots
 
-  -- a mix of pew-pew and self-brewed stuff.
   enemies = {}
   for i=0,7 do
     local enemy = {}
@@ -36,11 +18,12 @@ function love.load(arg)
     enemy.height = 20
     enemy.x = i * (enemy.width + 60) + 100
     enemy.y = enemy.height + 100
-    --phys. skeleton init
-    skeleton = world:newRectangleCollider(enemy.x, enemy.y, enemy.width + 3, enemy.height + 3)
-    skeleton:setType('Static')
     table.insert(enemies, enemy)
   end
+  world = wf.newWorld(0, 0, true)
+  world:setGravity(0, 512)
+  ground = world:newRectangleCollider(0, 465, 800, 150)
+  ground:setType('static') -- Types can be 'static', 'dynamic' or 'kinematic'. Defaults to 'dynamic'
 end
 
 function love.keyreleased(key)
@@ -49,7 +32,6 @@ function love.keyreleased(key)
     shoot()
   end
 end
-
 function love.update(dt)
   -- keyboard actions for our hero
   if love.keyboard.isDown("left") then
@@ -67,7 +49,9 @@ function love.update(dt)
   for i,v in ipairs(hero.shots) do
     -- move them up up up
     v.y = v.y - dt * 100
-  
+    
+    
+
     -- mark shots that are not visible for removal
     if v.y < 0 then
       table.insert(remShot, i)
@@ -143,7 +127,6 @@ function shoot()
   box = world:newRectangleCollider(shot.x, shot.y, 15, 25)
   box:setRestitution(0.5)
   box:applyLinearImpulse(0, -410)
-  box:setCollisionClass('Bullet')
 end
 
 -- Collision detection function.
